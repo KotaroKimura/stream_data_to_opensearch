@@ -1,0 +1,52 @@
+{
+  "settings": {
+    "index": {
+      "number_of_shards": "1",
+      "number_of_replicas": "0",
+      "refresh_interval": "15s",
+      "analysis": {
+        "char_filter": {
+          "normalize": {
+            "type": "icu_normalizer",
+            "name": "nfkc",
+            "mode": "compose"
+          }
+        },
+        "tokenizer": {
+          "opensearch_sample_tokenizer": {
+            "mode": "search",
+            "type": "kuromoji_tokenizer",
+            "discard_punctuation": "true",
+            "discard_compound_token": "true"
+          }
+        },
+        "analyzer": {
+          "opensearch_sample_jp_analyzer": {
+            "type": "custom",
+            "char_filter": [
+              "normalize",
+              "kuromoji_iteration_mark"
+            ],
+            "tokenizer": "opensearch_sample_tokenizer"
+          }
+        }
+      }
+    }
+  },
+  "mappings": {
+    "dynamic": "strict",
+    "properties": {
+      "id": {
+        "type": "keyword",
+        "doc_values": false
+      },
+      "title": {
+        "type": "text",
+        "term_vector": "with_positions",
+        "norms": false,
+        "index_options": "offsets",
+        "analyzer": "opensearch_sample_jp_analyzer"
+      }
+    }
+  }
+}

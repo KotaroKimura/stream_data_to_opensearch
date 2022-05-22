@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  opensearch-sample:
+    container_name: opensearch-sample
+    build:
+      context: .
+      dockerfile: ./docker/opensearch/Dockerfile
+    environment:
+      - cluster.name=opensearch-sample-cluster
+      - node.name=node-1
+      - cluster.initial_master_nodes=node-1
+      - bootstrap.memory_lock=true
+      - http.host=0.0.0.0
+      - transport.host=127.0.0.1
+      - 'OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m'
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - $PWD/.local/opensearch:/usr/share/opensearch/data
+    ports:
+      - 9200:9200
+  localstack-playground:
+    container_name: localstack-playground
+    build:
+      context: .
+      dockerfile: ./docker/localstack/Dockerfile
+    ports:
+      - 4566:4566
+      - 4571:4571
+    environment:
+      - LOCALSTACK_SERVICES=kinesis,lambda
+      - DEBUG=${DEBUG-}
+      - DATA_DIR=${DATA_DIR- }
+      - LAMBDA_EXECUTOR=docker-reuse
+      - LOCALSTACK_API_KEY=${LOCALSTACK_API_KEY- }
+      - HOST_TMP_FOLDER=${TMPDIR:-/tmp/}localstack
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - ${TMPDIR:-/tmp}/localstack:/tmp/localstack
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./lambda_functions:/src/lambda_functions
+      - ./docker/localstack/scripts:/opt/code/localstack/scripts
+  initializer:
+    container_name: opensearch-sample-initializer
+    build:
+      context: .
+      dockerfile: ./docker/initializer/Dockerfile
+    depends_on:
+      - opensearch-sample
+    command: sh -c "sh wait-for https://opensearch-sample:9200 -t 60 -- sh initializer.sh"
