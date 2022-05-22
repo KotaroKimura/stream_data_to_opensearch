@@ -30,7 +30,10 @@ $ rm -rf .local
 
 # kinesis からデータ挿入
 ```
-aws --endpoint-url=http://localstack-playground:4566 kinesis put-record \
+$ docker exec -it localstack-playground /bin/bash
+
+# in localstack-playground container
+$ aws --endpoint-url=http://localstack-playground:4566 kinesis put-record \
     --stream-name lambda-stream-sample \
     --partition-key 000 \
     --data '{
@@ -41,7 +44,7 @@ aws --endpoint-url=http://localstack-playground:4566 kinesis put-record \
         }
     }'
 
-aws --endpoint-url=http://localstack-playground:4566 kinesis put-record \
+$ aws --endpoint-url=http://localstack-playground:4566 kinesis put-record \
     --stream-name lambda-stream-sample \
     --partition-key 000 \
     --data '{
