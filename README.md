@@ -1,5 +1,5 @@
 # stream_data_to_opensearch
-opensearch へstreaming でデータをロードするアーキテクチャサンプル
+opensearch へstreaming でデータをロードするアーキテクチャサンプル<br>
 kinesis data stream -> lambda function -> opensearch でロードする
 
 # セットアップ
